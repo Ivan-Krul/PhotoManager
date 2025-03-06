@@ -40,6 +40,44 @@ Branch initDirList(Path path) {
   return branch;
 }
 
+class CommandInputDateStamp {
+  //
+};
+
+// instead of bunch of commands, we should make it a class
+
+void inputDateStampYear(std::string& reserved_input, Branch& branch, Date& date) {
+  short year = 0;
+  std::string ybuffer = reserved_input.erase(0, reserved_input.find(' '));
+
+  if (ybuffer == "XXXX") {
+    date.year = std::numeric_limits<short>::min();
+  }
+
+  try {
+    year = std::stoi(ybuffer);
+  } catch (std::exception& e) {
+    std::cout << "Invalid year input: " << e.what() << '\n';
+    return;
+  }
+
+  bool similar = false;
+  for (size_t i = 0; i < branch.years.size(); i++) {
+    similar = branch.years[i] == year;
+    if (similar) break;
+  }
+
+  if (!similar) {
+    std::cout << "The year isn't existing\n";
+    return;
+  }
+}
+
+void inputDateStamp(std::string& reserved_input, Branch& branch, Date& date) {
+  inputDateStampYear(reserved_input, branch, date);
+  // todo there
+}
+
 int main(int args, char* argv[]) {
   Branch branch;
   Date desired_date = {0};
@@ -60,17 +98,13 @@ int main(int args, char* argv[]) {
     std::cout << "[]: ";
     std::getline(std::cin, inp);
 
-    if (inp == "exit") continue;
+    if (inp.substr(0,4) == "exit") continue;
 
-    if (inp == "goin") {
-      inp.erase(0, 5);
-      short year = std::stoi(inp.erase(0, inp.find(' ')));
-
-      // todo there
+    if (inp == "date stamp") {
+      inp.erase(0, 11);
+      inputDateStamp(inp, branch, desired_date);
 
     }
-    
-
   }
 
   std::cout << "exiting... \n";
