@@ -30,8 +30,6 @@ struct Branch {
   bool has_buffer_dir = false;
 };
 
-
-
 Branch initDirList(Path path) {
   Branch branch;
   branch.path = path;
@@ -292,7 +290,17 @@ private:
 
 };
 
+class CommandCompressWebp : public CommandBase {
+public:
+  CommandCompressWebp(Status& status) : CommandBase(status) {
+    mPath = status.branch.path / std::to_string(status.date.year);
 
+  }
+
+private:
+
+  Path mPath;
+};
 
 #pragma region operators of overloading for std::ostream
 std::ostream& operator<<(std::ostream& out, Date date) {
@@ -361,7 +369,12 @@ int main(int args, char* argv[]) {
       if (cmd.isExceptionTriggered())
         std::cout << "exception has invoked!\n";
     }
-
+    else if (status.input.substr(0, 21) == "compress images webp") {
+      status.input.erase(0, status.input.find_first_not_of(' ', 21));
+      CommandCompressWebp cmd(status);
+      if (cmd.isExceptionTriggered())
+        std::cout << "exception has invoked!\n";
+    }
   }
 
   std::cout << "exiting... \n";
