@@ -30,11 +30,24 @@ struct Branch {
   bool has_buffer_dir = false;
 };
 
+
+
 Branch initDirList(Path path) {
   Branch branch;
   branch.path = path;
 
-  for (const auto& item : std::filesystem::directory_iterator(path)) {
+  std::filesystem::directory_iterator items;
+
+  try {
+    items = std::filesystem::directory_iterator(path);
+  }
+  catch (std::exception& e) {
+    std::cout << "exception with input access\n";
+    std::cout << e.what() << '\n';
+    exit(1);
+  }
+
+  for (const auto& item : items) {
     if (!item.is_directory()) continue;
 
     if (isdigit(item.path().filename().string()[0]))
@@ -54,9 +67,22 @@ struct Status {
   Date date = mNullDate;
 };
 
-class CommandInputDateStamp {
+class CommandBase {
 public:
-  CommandInputDateStamp(Status& status) : sStatus(status) {
+  CommandBase(Status& status) : sStatus(status) {}
+
+  bool isExceptionTriggered() const { return mExceptionTriggered; }
+
+protected:
+  Status& sStatus;
+
+  std::string mBuffer;
+  bool mExceptionTriggered = false;
+};
+
+class CommandInputDateStamp : public CommandBase {
+public:
+  CommandInputDateStamp(Status& status) : CommandBase(status) {
     if (status.input.size() < 4) {
       std::cout << "Nothing to process\n";
       return;
@@ -74,10 +100,8 @@ public:
     if (mExceptionTriggered = inputSexagesimal(DateAspect::Seconds)) return;
   }
 
-  bool isExceptionTriggered() const { return mExceptionTriggered; }
-
 private:
-  bool setNullDateAspectWhenX(short x_count, DateAspect date_aspect) {
+  bool setNullDateAspectWhenX(short x_count, DateAspect date_aspect, char sep) {
     short x_iters = 0;
     for (x_iters; x_iters < x_count; x_iters++) {
       if (mBuffer[x_iters] != 'X') break;
@@ -92,7 +116,7 @@ private:
     case DateAspect::Minutes: sStatus.date.minutes = mNullDate.minutes; break;
     case DateAspect::Seconds: sStatus.date.seconds = mNullDate.seconds; break;
     }
-    cleanFollowingPadding();
+    cleanFollowingPadding(sep);
     return true;
   } 
 
@@ -134,8 +158,8 @@ private:
     }
   }
 
-  void cleanFollowingPadding() {
-    short ind = sStatus.input.find_first_not_of(' ');
+  void cleanFollowingPadding(char sep = ' ') {
+    short ind = sStatus.input.find_first_not_of(sep);
     if (ind == -1) {
       sStatus.input.clear();
       return;
@@ -143,11 +167,12 @@ private:
     sStatus.input.erase(0, ind);
   }
 
+#pragma region inputs for each element of the date in the class
   bool inputYear() {
     short year = 0;
-    extractIntoBuffer();
+    extractIntoBuffer('.');
 
-    if (setNullDateAspectWhenX(4, DateAspect::Year)) return false;
+    if (setNullDateAspectWhenX(4, DateAspect::Year, '.')) return false;
 
     try {
       year = std::stoi(mBuffer);
@@ -167,16 +192,16 @@ private:
       return true;
     }
     sStatus.date.year = year;
-    cleanFollowingPadding();
+    cleanFollowingPadding('.');
 
     return false;
   }
 
   bool inputMonth() {
     short month;
-    extractIntoBuffer();
-    
-    if (setNullDateAspectWhenX(2, DateAspect::Month)) return false;
+    extractIntoBuffer('.');
+
+    if (setNullDateAspectWhenX(2, DateAspect::Month, '.')) return false;
 
     try {
       month = std::stoi(mBuffer);
@@ -190,16 +215,16 @@ private:
       return true;
     }
     sStatus.date.month = month;
-    cleanFollowingPadding();
+    cleanFollowingPadding('.');
 
     return false;
   }
 
   bool inputDay() {
     short day;
-    extractIntoBuffer();
+    extractIntoBuffer(' ');
 
-    if (setNullDateAspectWhenX(2, DateAspect::Day)) return false;
+    if (setNullDateAspectWhenX(2, DateAspect::Day, ' ')) return false;
 
     try {
       day = std::stoi(mBuffer);
@@ -208,21 +233,21 @@ private:
       return true;
     }
 
-    if (day == 0 || day > calculateDaysInMonth()) {
+    if (day == 0 || (day > calculateDaysInMonth() && calculateDaysInMonth() != 0)) {
       std::cout << "The day is invalid\n";
       return true;
     }
     sStatus.date.day = day;
-    cleanFollowingPadding();
+    cleanFollowingPadding(' ');
 
     return false;
   }
 
   bool inputHours() {
     short hours;
-    extractIntoBuffer();
+    extractIntoBuffer(':');
 
-    if (setNullDateAspectWhenX(2, DateAspect::Hours)) return false;
+    if (setNullDateAspectWhenX(2, DateAspect::Hours, ':')) return false;
 
     try {
       hours = std::stoi(mBuffer);
@@ -236,21 +261,21 @@ private:
       return true;
     }
     sStatus.date.hours = hours;
-    cleanFollowingPadding();
+    cleanFollowingPadding(':');
 
     return false;
   }
 
   bool inputSexagesimal(DateAspect min_or_sec) {
     short num;
-    extractIntoBuffer();
+    extractIntoBuffer(':');
 
-    if (setNullDateAspectWhenX(2, min_or_sec)) return false;
+    if (setNullDateAspectWhenX(2, min_or_sec, ':')) return false;
 
     try {
       num = std::stoi(mBuffer);
     } catch (std::exception& e) {
-      std::cout << "Invalid "<< (min_or_sec == DateAspect::Minutes ? "minutes" : "seconds") <<" input: " << e.what() << '\n';
+      std::cout << "Invalid " << (min_or_sec == DateAspect::Minutes ? "minutes" : "seconds") << " input: " << e.what() << '\n';
       return true;
     }
 
@@ -259,27 +284,23 @@ private:
       return true;
     }
     (min_or_sec == DateAspect::Minutes ? sStatus.date.minutes : sStatus.date.seconds) = num;
-    cleanFollowingPadding();
+    cleanFollowingPadding(':');
 
     return false;
   }
-
-private:
-  Status& sStatus;
-  
-
-  std::string mBuffer;
-  bool mExceptionTriggered = false;
+#pragma endregion
 
 };
 
 
+
+#pragma region operators of overloading for std::ostream
 std::ostream& operator<<(std::ostream& out, Date date) {
   out << std::setfill('0');
   if (date.year == mNullDate.year) out << "XXXX";
   else out << std::setw(4) << date.year;
 
-  out  << '.';
+  out << '.';
 
   if (date.month == mNullDate.month) out << "XX";
   else out << std::setw(2) << date.month;
@@ -306,7 +327,7 @@ std::ostream& operator<<(std::ostream& out, Date date) {
 
   return out;
 }
-
+#pragma endregion
 
 int main(int args, char* argv[]) {
   Status status = {};
@@ -337,10 +358,10 @@ int main(int args, char* argv[]) {
     if (status.input.substr(0, 10) == "date stamp") {
       status.input.erase(0, status.input.find_first_not_of(' ', 10));
       CommandInputDateStamp cmd(status);
-      if (cmd.isExceptionTriggered()) {
+      if (cmd.isExceptionTriggered())
         std::cout << "exception has invoked!\n";
-      }
     }
+
   }
 
   std::cout << "exiting... \n";
