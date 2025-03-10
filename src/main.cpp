@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <chrono>
 
 using Path = std::filesystem::path;
 
@@ -21,7 +22,7 @@ enum class DateAspect {
   Year, Month, Day, Hours, Minutes, Seconds
 };
 
-constexpr Date mNullDate = { std::numeric_limits<short>::min(), 0,0,0xff,0xff,0xff };
+constexpr Date cNullDate = { std::numeric_limits<short>::min(), 0,0,0xff,0xff,0xff };
 
 struct Branch {
   Path path;
@@ -62,7 +63,7 @@ Branch initDirList(Path path) {
 struct Status {
   std::string input;
   Branch branch;
-  Date date = mNullDate;
+  Date date = cNullDate;
 };
 
 class CommandBase {
@@ -107,19 +108,19 @@ private:
     if (x_iters != x_count) return false;
 
     switch (date_aspect) {
-    case DateAspect::Year:    sStatus.date.year    = mNullDate.year   ; break;
-    case DateAspect::Month:   sStatus.date.month   = mNullDate.month  ; break;
-    case DateAspect::Day:     sStatus.date.day     = mNullDate.day    ; break;
-    case DateAspect::Hours:   sStatus.date.hours   = mNullDate.hours  ; break;
-    case DateAspect::Minutes: sStatus.date.minutes = mNullDate.minutes; break;
-    case DateAspect::Seconds: sStatus.date.seconds = mNullDate.seconds; break;
+    case DateAspect::Year:    sStatus.date.year    = cNullDate.year   ; break;
+    case DateAspect::Month:   sStatus.date.month   = cNullDate.month  ; break;
+    case DateAspect::Day:     sStatus.date.day     = cNullDate.day    ; break;
+    case DateAspect::Hours:   sStatus.date.hours   = cNullDate.hours  ; break;
+    case DateAspect::Minutes: sStatus.date.minutes = cNullDate.minutes; break;
+    case DateAspect::Seconds: sStatus.date.seconds = cNullDate.seconds; break;
     }
     cleanFollowingPadding(sep);
     return true;
   } 
 
   short calculateDaysInMonth() {
-    if (sStatus.date.month == mNullDate.month) return 0;
+    if (sStatus.date.month == cNullDate.month) return 0;
 
     switch (sStatus.date.month) {
     case 1:
@@ -137,7 +138,7 @@ private:
     case 11:
       return 30;
     case 2:
-      if (sStatus.date.year == mNullDate.year) return 28;
+      if (sStatus.date.year == cNullDate.year) return 28;
       if (sStatus.date.year % 400 == 0) return 29;
       if (sStatus.date.year % 100 == 0) return 28;
       return 28 + (sStatus.date.year % 4 == 0);
@@ -290,11 +291,87 @@ private:
 
 };
 
+class Selector {
+public:
+  inline Selector(Status& status) : sStatus(status) {}
+
+  size_t filterByDate() {
+    std::filesystem::recursive_directory_iterator items;
+    if (sStatus.date.year != cNullDate.year) {
+      if (sStatus.date.month != cNullDate.month)
+        items = std::filesystem::recursive_directory_iterator(sStatus.branch.path / std::to_string(sStatus.date.year) / std::to_string(sStatus.date.month));
+      else
+        items = std::filesystem::recursive_directory_iterator(sStatus.branch.path / std::to_string(sStatus.date.year));
+    }
+    else
+      items = std::filesystem::recursive_directory_iterator(sStatus.branch.path);
+
+    std::string buf;
+
+    for (auto const& item : items) {
+      if (item.is_directory()) continue;
+      buf = item.path().filename().string();
+      try {
+        buf = buf.substr(buf.find('_') + 5, 11);
+      
+        if (sStatus.date.month != cNullDate.month) {
+          if (sStatus.date.month != std::stoi(buf.substr(0, 2))) continue;
+        }
+        if (sStatus.date.day != cNullDate.day) {
+          if (sStatus.date.day != std::stoi(buf.substr(2, 2))) continue;
+        }
+        if (sStatus.date.hours != cNullDate.hours) {
+          if (sStatus.date.hours != std::stoi(buf.substr(5, 2))) continue;
+        }
+        if (sStatus.date.minutes != cNullDate.minutes) {
+          if (sStatus.date.minutes != std::stoi(buf.substr(7, 2))) continue;
+        }
+        if (sStatus.date.seconds != cNullDate.seconds) {
+          if (sStatus.date.seconds != std::stoi(buf.substr(9, 2))) continue;
+        }
+      }
+      catch (...) {
+        // error of conversion could result of other files
+        continue;
+      }
+
+      mPaths.emplace_back(item.path());
+    }
+
+    mPaths.shrink_to_fit();
+    return mPaths.size();
+  }
+
+  size_t filterByExtension() {
+    auto items = std::filesystem::recursive_directory_iterator(sStatus.branch.path);
+
+    for (auto const& item : items) {
+      if(
+      if (item.path().extension().string() == sStatus.input)
+        mPaths.emplace_back(item.path());
+    }
+
+    mPaths.shrink_to_fit();
+    return mPaths.size();
+  }
+
+  inline size_t size() const { return mPaths.size(); }
+  inline const Path operator[](size_t index) const {
+    return mPaths.at(index);
+  }
+
+  inline std::vector<Path>::iterator begin() { return mPaths.begin(); }
+  inline std::vector<Path>::iterator end() { return mPaths.end(); }
+
+private:
+  std::vector<Path> mPaths;
+  Status& sStatus;
+};
+
 class CommandCompressWebp : public CommandBase {
 public:
   CommandCompressWebp(Status& status) : CommandBase(status) {
     mPath = status.branch.path / std::to_string(status.date.year);
-
   }
 
 private:
@@ -305,32 +382,32 @@ private:
 #pragma region operators of overloading for std::ostream
 std::ostream& operator<<(std::ostream& out, Date date) {
   out << std::setfill('0');
-  if (date.year == mNullDate.year) out << "XXXX";
+  if (date.year == cNullDate.year) out << "XXXX";
   else out << std::setw(4) << date.year;
 
   out << '.';
 
-  if (date.month == mNullDate.month) out << "XX";
+  if (date.month == cNullDate.month) out << "XX";
   else out << std::setw(2) << date.month;
 
   out << '.';
 
-  if (date.day == mNullDate.day) out << "XX";
+  if (date.day == cNullDate.day) out << "XX";
   else out << std::setw(2) << date.day;
 
   out << ' ';
 
-  if (date.hours == mNullDate.hours) out << "XX";
+  if (date.hours == cNullDate.hours) out << "XX";
   else out << std::setw(2) << date.hours;
 
   out << ':';
 
-  if (date.minutes == mNullDate.minutes) out << "XX";
+  if (date.minutes == cNullDate.minutes) out << "XX";
   else out << std::setw(2) << date.minutes;
 
   out << ':';
 
-  if (date.seconds == mNullDate.seconds) out << "XX";
+  if (date.seconds == cNullDate.seconds) out << "XX";
   else out << std::setw(2) << date.seconds;
 
   return out;
@@ -357,11 +434,15 @@ int main(int args, char* argv[]) {
   }
   std::cout << '\n';
 
+  auto begt = std::chrono::steady_clock::now();
+
   while (status.input != "exit") {
     std::cout << "["<<status.date<<"]: ";
     std::getline(std::cin, status.input);
 
     if (status.input.substr(0,4) == "exit") continue;
+
+    begt = std::chrono::steady_clock::now();
 
     if (status.input.substr(0, 10) == "date stamp") {
       status.input.erase(0, status.input.find_first_not_of(' ', 10));
@@ -369,12 +450,30 @@ int main(int args, char* argv[]) {
       if (cmd.isExceptionTriggered())
         std::cout << "exception has invoked!\n";
     }
+    else if (status.input.substr(0, 14) == "list by dates") {
+      status.input.erase(0, status.input.find_first_not_of(' ', 11));
+      Selector s(status);
+      std::cout << "There's " << s.filterByDate() << " elements\n";;
+      for (auto& item : s) {
+        std::cout <<'\t' <<item.filename().string() << '\n';
+      }
+    }
+    else if (status.input.substr(0, 18) == "list by extension") { // fix there, it accepts only no extension
+      status.input.erase(0, status.input.find_first_not_of(' ', 18));
+      Selector s(status);
+      std::cout << "There's " << s.filterByExtension() << " elements\n";;
+      for (auto& item : s) {
+        std::cout << '\t' << item.filename().string() << '\n';
+      }
+    }
     else if (status.input.substr(0, 21) == "compress images webp") {
       status.input.erase(0, status.input.find_first_not_of(' ', 21));
       CommandCompressWebp cmd(status);
       if (cmd.isExceptionTriggered())
         std::cout << "exception has invoked!\n";
     }
+    
+    std::cout << "time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - begt).count() / 1000.f << "ms\n";
   }
 
   std::cout << "exiting... \n";
