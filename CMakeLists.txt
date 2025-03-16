@@ -16,7 +16,6 @@ set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_subdirectory(external/libwebp)
 
 project ("PhotoManager")
 
@@ -33,6 +32,13 @@ endforeach()
 
 list(REMOVE_DUPLICATES INCLUDE_DIRS)
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
+
+# Include modules
+add_subdirectory(external/libwebp)
 target_link_libraries(${PROJECT_NAME} PRIVATE webp)
+
+find_package(JPEG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
+
 
 #add_subdirectory ("src" "./bin/")

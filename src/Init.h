@@ -2,6 +2,8 @@
 #include <iostream>
 #include "Branch.h"
 
+#include <jpeglib.h>
+
 Branch initDirList(Path path);
 
 int init(int args, char* argv[], Status& status) {
@@ -29,6 +31,16 @@ int init(int args, char* argv[], Status& status) {
    
  }
   std::cout << '\n';
+
+  jpeg_decompress_struct cinfo;
+  jpeg_error_mgr jerr;
+
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_decompress(&cinfo);
+
+  printf("libjpeg is working correctly!\n");
+
+  jpeg_destroy_decompress(&cinfo);
 
   return 0;
 }

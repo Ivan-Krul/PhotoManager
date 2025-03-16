@@ -1,6 +1,8 @@
 #pragma once
-#include <webp/encode.h>
 #include <iostream>
+
+#include <jpeglib.h>
+#include <webp/encode.h>
 
 #include "CommandBase.h"
 #include "Selector.h"
@@ -9,6 +11,7 @@ class CommandCompressWebp : public CommandBase {
 public:
   CommandCompressWebp(Status& status) : CommandBase(status) {
     Selector select(status);
+    
 
     WebPConfig config;
     if (mExceptionTriggered = (!WebPConfigPreset(&config, WEBP_PRESET_PHOTO, 0.75))) {
@@ -27,4 +30,5 @@ public:
     select.filterByDate();
   }
 
+ 
 };
