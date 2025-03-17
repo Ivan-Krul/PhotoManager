@@ -1,16 +1,17 @@
 #pragma once
 #include <iostream>
-#include "Branch.h"
 
-#include <jpeglib.h>
+#include "Branch.h"
+#include "OstreamOverloads.h"
 
 Branch initDirList(Path path);
+void outputStatus(const Status& status);
 
 int init(int args, char* argv[], Status& status) {
 #ifdef DEBUG
   status.branch.path = Path("D:/Cellphone");
-  status.date.year = 2024;
-  status.date.month = 5;
+  status.date.year = 2025;
+  status.date.month = 3;
 #else
   if (args < 2) {
     std::string manual_path;
@@ -24,25 +25,23 @@ int init(int args, char* argv[], Status& status) {
 
   status.branch = initDirList(status.branch.path);
 
- for (size_t y = 0; y < status.branch.years.size(); y++) {
-   if (y == 0) std::cout << "Years:";
-   std::cout << '\t' << status.branch.years[y];
-   if (y + 1 != status.branch.years.size()) std::cout << ',';
-   
- }
-  std::cout << '\n';
-
-  jpeg_decompress_struct cinfo;
-  jpeg_error_mgr jerr;
-
-  cinfo.err = jpeg_std_error(&jerr);
-  jpeg_create_decompress(&cinfo);
-
-  printf("libjpeg is working correctly!\n");
-
-  jpeg_destroy_decompress(&cinfo);
+  outputStatus(status);
 
   return 0;
+}
+
+void outputStatus(const Status& status) {
+  std::cout << "Status\n";
+  for (size_t y = 0; y < status.branch.years.size(); y++) {
+    if (y == 0) std::cout << "\tYears:";
+    std::cout << '\t' << status.branch.years[y];
+    if (y + 1 != status.branch.years.size()) std::cout << ',';
+
+  }
+  std::cout << "\n\tPath:" << status.branch.path << '\n';
+  std::cout << "\tDate:" << status.date << '\n';
+  std::cout << "\tHas Buffer Directory:" << (status.branch.has_buffer_dir ? "yes" : "no") << '\n';
+  std::cout << "\tHas Research Directory:" << (status.branch.has_research ? "yes" : "no") << '\n';
 }
 
 Branch initDirList(Path path) {

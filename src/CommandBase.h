@@ -10,7 +10,6 @@ public:
 protected:
   Status& sStatus;
 
-  std::string mBuffer;
   bool mExceptionTriggered = false;
 };
 

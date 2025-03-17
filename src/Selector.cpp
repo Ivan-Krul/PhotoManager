@@ -1,17 +1,8 @@
 #include "Selector.h"
 
-size_t Selector::filterByDate() {
-  std::filesystem::recursive_directory_iterator items;
-
+Selector& Selector::filterByDate() {
   EmplacedStatus es(sStatus.date);
-
-  if (es.year) {
-    if (es.month)
-      items = std::filesystem::recursive_directory_iterator(sStatus.branch.path / std::to_string(sStatus.date.year) / std::to_string(sStatus.date.month));
-    else
-      items = std::filesystem::recursive_directory_iterator(sStatus.branch.path / std::to_string(sStatus.date.year));
-  } else
-    items = std::filesystem::recursive_directory_iterator(sStatus.branch.path);
+  RecurseItemIterator items = extractDirectory((es.year) ? ((es.month) ? YEAR_MONTH : YEAR) : DEFAULT);
 
   std::string buf;
   size_t underline = 0;
@@ -55,11 +46,11 @@ size_t Selector::filterByDate() {
   }
 
   mPaths.shrink_to_fit();
-  return mPaths.size();
+  return *this;
 }
 
-size_t Selector::filterByExtension() {
-  auto items = std::filesystem::recursive_directory_iterator(sStatus.branch.path);
+Selector& Selector::filterByExtension() {
+  auto items = extractDirectory(DEFAULT);
 
   for (auto const& item : items) {
     if (item.path().extension().string() == sStatus.input)
@@ -67,5 +58,17 @@ size_t Selector::filterByExtension() {
   }
 
   mPaths.shrink_to_fit();
-  return mPaths.size();
+  return *this;
+}
+
+RecurseItemIterator Selector::extractDirectory(ExtractIteratorMode eim) {
+  switch (eim) {
+  case YEAR:
+    return RecurseItemIterator(sStatus.branch.path / std::to_string(sStatus.date.year));
+  case YEAR_MONTH:
+    return RecurseItemIterator(sStatus.branch.path / std::to_string(sStatus.date.year) / std::to_string(sStatus.date.month));
+  case DEFAULT:
+  default:
+    return RecurseItemIterator(sStatus.branch.path);
+  }
 }

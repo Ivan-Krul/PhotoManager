@@ -21,5 +21,8 @@ private:
   bool inputHours();
   bool inputSexagesimal(DateAspect min_or_sec);
 
+private:
+  std::string mBuffer;
+
 };
 

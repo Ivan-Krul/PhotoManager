@@ -2,13 +2,21 @@
 #include <string>
 
 #include "Status.h"
+  
+using RecurseItemIterator = std::filesystem::recursive_directory_iterator;
 
 class Selector {
+private:
+  enum ExtractIteratorMode {
+    DEFAULT,
+    YEAR,
+    YEAR_MONTH
+  };
 public:
   inline Selector(Status& status) : sStatus(status) {}
 
-  size_t filterByDate();
-  size_t filterByExtension();
+  Selector& filterByDate();
+  Selector& filterByExtension();
 
   inline size_t size() const { return mPaths.size(); }
   inline const Path operator[](size_t index) const { return mPaths.at(index); }
@@ -31,6 +39,8 @@ private:
       + ((numstr >> 8) & 0x0f) * 100
       + (numstr & 0x0f) * 1000;
   }
+
+  RecurseItemIterator extractDirectory(ExtractIteratorMode eim);
 
 private:
   std::vector<Path> mPaths;
