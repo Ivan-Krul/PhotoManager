@@ -4,6 +4,7 @@
 #include "Status.h"
   
 using RecurseItemIterator = std::filesystem::recursive_directory_iterator;
+using Item = std::filesystem::directory_entry;
 
 class Selector {
 private:
@@ -18,11 +19,11 @@ public:
   Selector& filterByDate();
   Selector& filterByExtension();
 
-  inline size_t size() const { return mPaths.size(); }
-  inline const Path operator[](size_t index) const { return mPaths.at(index); }
+  inline size_t size() const { return mItems.size(); }
+  inline const Path operator[](size_t index) const { return mItems.at(index).path(); }
 
-  inline std::vector<Path>::iterator begin() { return mPaths.begin(); }
-  inline std::vector<Path>::iterator end() { return mPaths.end(); }
+  inline std::vector<Item>::iterator begin() { return mItems.begin(); }
+  inline std::vector<Item>::iterator end() { return mItems.end(); }
 
 private:
   template<short StrLen>
@@ -40,10 +41,13 @@ private:
       + (numstr & 0x0f) * 1000;
   }
 
+  void getItemsInList(ExtractIteratorMode eim = DEFAULT);
+
   RecurseItemIterator extractDirectory(ExtractIteratorMode eim);
 
 private:
-  std::vector<Path> mPaths;
+  std::vector<Item> mItems;
   Status& sStatus;
+  bool bFirstTime = true;
 };
 

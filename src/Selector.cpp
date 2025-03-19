@@ -9,7 +9,11 @@ Selector& Selector::filterByDate() {
 
   char* ptr;
 
-  for (auto const& item : items) {
+  auto copy_items = mItems;
+  mItems.clear();
+  mItems.reserve(mItems.size() / 2);
+
+  for (auto const& item : copy_items) {
     if (item.is_directory()) continue;
     buf = item.path().filename().string();
 
@@ -42,23 +46,39 @@ Selector& Selector::filterByDate() {
       continue;
     }
 
-    mPaths.emplace_back(item.path());
+    mItems.emplace_back(item);
   }
 
-  mPaths.shrink_to_fit();
+  mItems.shrink_to_fit();
   return *this;
 }
 
 Selector& Selector::filterByExtension() {
-  auto items = extractDirectory(DEFAULT);
+  getItemsInList();
 
-  for (auto const& item : items) {
+  if (sStatus.input[0] != '.') sStatus.input.insert(sStatus.input.begin(), '.');
+
+  auto copy_items = mItems;
+  mItems.clear();
+  mItems.reserve(mItems.size() / 2);
+
+  for (auto const& item : copy_items) {
     if (item.path().extension().string() == sStatus.input)
-      mPaths.emplace_back(item.path());
+      mItems.emplace_back(item);
   }
 
-  mPaths.shrink_to_fit();
+  mItems.shrink_to_fit();
   return *this;
+}
+
+void Selector::getItemsInList(ExtractIteratorMode eim) {
+  if (!bFirstTime) return;
+
+  auto items = extractDirectory(eim);
+  for (auto const& item : items) {
+    mItems.emplace_back(item);
+  }
+  bFirstTime = false;
 }
 
 RecurseItemIterator Selector::extractDirectory(ExtractIteratorMode eim) {

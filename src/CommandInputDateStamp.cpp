@@ -13,9 +13,9 @@ CommandInputDateStamp::CommandInputDateStamp(Status& status) : CommandBase(statu
   if (status.input.size() < 2) return;
   if (mExceptionTriggered = inputHours()) return;
   if (status.input.size() < 2) return;
-  if (mExceptionTriggered = inputSexagesimal(DateAspect::Minutes)) return;
+  if (mExceptionTriggered = inputMinutes()) return;
   if (status.input.size() < 2) return;
-  if (mExceptionTriggered = inputSexagesimal(DateAspect::Seconds)) return;
+  if (mExceptionTriggered = inputSeconds()) return;
 }
 
 bool CommandInputDateStamp::setNullDateAspectWhenX(short x_count, DateAspect date_aspect, char sep) {
@@ -26,10 +26,10 @@ bool CommandInputDateStamp::setNullDateAspectWhenX(short x_count, DateAspect dat
   if (x_iters != x_count) return false;
 
   switch (date_aspect) {
-  case DateAspect::Year:    sStatus.date.year = cNullDate.year; break;
-  case DateAspect::Month:   sStatus.date.month = cNullDate.month; break;
-  case DateAspect::Day:     sStatus.date.day = cNullDate.day; break;
-  case DateAspect::Hours:   sStatus.date.hours = cNullDate.hours; break;
+  case DateAspect::Year:    sStatus.date.year    = cNullDate.year;    break;
+  case DateAspect::Month:   sStatus.date.month   = cNullDate.month;   break;
+  case DateAspect::Day:     sStatus.date.day     = cNullDate.day;     break;
+  case DateAspect::Hours:   sStatus.date.hours   = cNullDate.hours;   break;
   case DateAspect::Minutes: sStatus.date.minutes = cNullDate.minutes; break;
   case DateAspect::Seconds: sStatus.date.seconds = cNullDate.seconds; break;
   }
@@ -84,125 +84,98 @@ void CommandInputDateStamp::cleanFollowingPadding(char sep) {
 }
 
 #pragma region inputs for each element of the date in the class
-bool CommandInputDateStamp::inputYear() {
-  short year = 0;
-  extractIntoBuffer('.');
 
-  if (setNullDateAspectWhenX(4, DateAspect::Year, '.')) return false;
+bool CommandInputDateStamp::inputDateElement(DateAspect aspect, char separator, const char* element_name, std::function<bool(short)> cond) {
+  short elem;
+  extractIntoBuffer(separator);
+
+  if (setNullDateAspectWhenX(2 + ((aspect == DateAspect::Year) * 2), aspect, separator)) return false;
 
   try {
-    year = std::stoi(mBuffer);
+    elem = std::stoi(mBuffer);
   } catch (std::exception& e) {
-    std::cout << "Invalid year input: " << e.what() << '\n';
+    std::cout << "Invalid " << element_name << " input: " << e.what() << '\n';
     return true;
   }
 
-  bool similar = false;
-  for (size_t i = 0; i < sStatus.branch.years.size(); i++) {
-    similar = sStatus.branch.years[i] == year;
-    if (similar) break;
-  }
-
-  if (!similar) {
-    std::cout << "The year isn't not represented with folders\n";
+  if (cond(elem)) {
+    std::cout << "The " << element_name << " is invalid\n";
     return true;
   }
-  sStatus.date.year = year;
-  cleanFollowingPadding('.');
+
+  switch (aspect) {
+  case DateAspect::Year: sStatus.date.year = elem; break;
+  case DateAspect::Month: sStatus.date.month = elem; break;
+  case DateAspect::Day: sStatus.date.day = elem; break;
+  case DateAspect::Hours: sStatus.date.hours = elem; break;
+  case DateAspect::Minutes: sStatus.date.minutes = elem; break;
+  case DateAspect::Seconds: sStatus.date.seconds = elem; break;
+  }
+  
+  cleanFollowingPadding(separator);
 
   return false;
+}
+
+bool CommandInputDateStamp::inputYear() {
+  return inputDateElement(
+    DateAspect::Year,
+    '.',
+    "year",
+    [=](short num) {
+      bool similar = false;
+      for (size_t i = 0; i < sStatus.branch.years.size(); i++) {
+        similar = sStatus.branch.years[i] == num;
+        if (similar) break;
+      }
+      return !similar;
+    }
+  );
 }
 
 bool CommandInputDateStamp::inputMonth() {
-  short month;
-  extractIntoBuffer('.');
-
-  if (setNullDateAspectWhenX(2, DateAspect::Month, '.')) return false;
-
-  try {
-    month = std::stoi(mBuffer);
-  } catch (std::exception& e) {
-    std::cout << "Invalid month input: " << e.what() << '\n';
-    return true;
-  }
-
-  if (month && month > 12) {
-    std::cout << "The month is invalid\n";
-    return true;
-  }
-  sStatus.date.month = month;
-  cleanFollowingPadding('.');
-
-  return false;
+  return inputDateElement(
+    DateAspect::Month,
+    '.',
+    "month",
+    [=](short num) { return num && num > 12; }
+  );
 }
 
 bool CommandInputDateStamp::inputDay() {
-  short day;
-  extractIntoBuffer(' ');
-
-  if (setNullDateAspectWhenX(2, DateAspect::Day, ' ')) return false;
-
-  try {
-    day = std::stoi(mBuffer);
-  } catch (std::exception& e) {
-    std::cout << "Invalid day input: " << e.what() << '\n';
-    return true;
-  }
-
-  if (day == 0 || (day > calculateDaysInMonth() && calculateDaysInMonth() != 0)) {
-    std::cout << "The day is invalid\n";
-    return true;
-  }
-  sStatus.date.day = day;
-  cleanFollowingPadding(' ');
-
-  return false;
+  return inputDateElement(
+    DateAspect::Day,
+    ' ',
+    "day",
+    [=](short num) { return num == 0 || (num > calculateDaysInMonth() && calculateDaysInMonth() != 0); }
+  );
 }
 
 bool CommandInputDateStamp::inputHours() {
-  short hours;
-  extractIntoBuffer(':');
-
-  if (setNullDateAspectWhenX(2, DateAspect::Hours, ':')) return false;
-
-  try {
-    hours = std::stoi(mBuffer);
-  } catch (std::exception& e) {
-    std::cout << "Invalid hours input: " << e.what() << '\n';
-    return true;
-  }
-
-  if (hours == 0 || hours > 23) {
-    std::cout << "The hours is invalid\n";
-    return true;
-  }
-  sStatus.date.hours = hours;
-  cleanFollowingPadding(':');
-
-  return false;
+  return inputDateElement(
+    DateAspect::Hours,
+    ':',
+    "hours",
+    [=](short num) { return num > 23; }
+  );
 }
 
-bool CommandInputDateStamp::inputSexagesimal(DateAspect min_or_sec) {
-  short num;
-  extractIntoBuffer(':');
+bool CommandInputDateStamp::inputMinutes() {
+  return inputDateElement(
+    DateAspect::Minutes,
+    ':',
+    "minutes",
+    [=](short num) { return num > 59; }
+  );
+}
 
-  if (setNullDateAspectWhenX(2, min_or_sec, ':')) return false;
-
-  try {
-    num = std::stoi(mBuffer);
-  } catch (std::exception& e) {
-    std::cout << "Invalid " << (min_or_sec == DateAspect::Minutes ? "minutes" : "seconds") << " input: " << e.what() << '\n';
-    return true;
-  }
-
-  if (num == 0 || num > 60) {
-    std::cout << "The " << (min_or_sec == DateAspect::Minutes ? "minutes" : "seconds") << " is invalid\n";
-    return true;
-  }
-  (min_or_sec == DateAspect::Minutes ? sStatus.date.minutes : sStatus.date.seconds) = num;
-  cleanFollowingPadding(':');
-
-  return false;
+bool CommandInputDateStamp::inputSeconds() {
+  return inputDateElement(
+    DateAspect::Seconds,
+    ':',
+    "seconds",
+    [=](short num) { return num > 59; }
+  );
 }
 #pragma endregion
 

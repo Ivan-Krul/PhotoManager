@@ -38,7 +38,7 @@ int main(int args, char* argv[]) {
       std::cout << "There's " << s.filterByDate().size() << " elements\n";;
       if (s.size() < 20) {
         for (auto& item : s) {
-          std::cout << '\t' << item.filename().string() << '\n';
+          std::cout << '\t' << item.path().filename().string() << '\n';
         }
       }
     }
@@ -48,7 +48,7 @@ int main(int args, char* argv[]) {
       std::cout << "There's " << s.filterByExtension().size() << " elements\n";;
       if (s.size() < 20) {
         for (auto& item : s) {
-          std::cout << '\t' << item.filename().string() << '\n';
+          std::cout << '\t' << item.path().filename().string() << '\n';
         }
       }
     }
