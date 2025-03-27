@@ -40,5 +40,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE webp)
 find_package(JPEG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
 
+find_package(exiv2 REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE exiv2)
 
 #add_subdirectory ("src" "./bin/")

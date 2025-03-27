@@ -1,2 +1,4 @@
 .vs
 build/
+vcpkg-configuration.json
+vcpkg_installed/

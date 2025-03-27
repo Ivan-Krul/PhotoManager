@@ -16,6 +16,7 @@ private:
 public:
   inline Selector(Status& status) : sStatus(status) {}
 
+  Selector& getPaths();
   Selector& filterByDate();
   Selector& filterByExtension();
 

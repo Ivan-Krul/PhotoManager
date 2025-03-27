@@ -5,6 +5,7 @@
 
 #include <jpeglib.h>
 #include <webp/encode.h>
+#include <exiv2/exiv2.hpp>
 
 char CommandCompressWebp::calculateOptimalLineFeed() {
   if (mHeight < 50) return 1;
@@ -69,12 +70,10 @@ bool CommandCompressWebp::writeToWebpInBuffer() {
     return false;
   }
 
-  mFilePath.replace_extension(".webp");
-
    std::ofstream fout(
      ((sStatus.branch.has_buffer_dir)
-       ? sStatus.branch.path / "buffer" / mFilePath.filename()
-       : mFilePath),
+       ? sStatus.branch.path / "buffer" / mOutPath.filename()
+       : mOutPath),
     std::ios::binary);
   
   fout.write(reinterpret_cast<char*>(mDataBuf), size);
@@ -82,5 +81,28 @@ bool CommandCompressWebp::writeToWebpInBuffer() {
 
 
   WebPFree(mDataBuf);
+  return false;
+}
+
+bool CommandCompressWebp::writeToWebpInExif() {
+  auto image_ptr = Exiv2::ImageFactory::open(mOutPath.string());
+  if (image_ptr.get() == 0) {
+    std::cout << "Failed to load WebP image for metadata override\n";
+    return true;
+  }
+  image_ptr->readMetadata();
+
+  Exiv2::ExifData& exifData = image_ptr->exifData();
+
+  if (exifData.empty()) {
+    std::cout << "No Exif data found in the file\n";
+    return true;
+  }
+  Exiv2::ExifData::const_iterator end = exifData.end();
+
+  for (auto& tag : exifData) {
+    // there
+  }
+
   return false;
 }
