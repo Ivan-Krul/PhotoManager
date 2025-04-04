@@ -35,7 +35,7 @@ int main(int args, char* argv[]) {
     else if (status.input.substr(0, 13) == "list by dates") {
       status.input.erase(0, status.input.find_first_not_of(' ', 11));
       Selector s(status);
-      std::cout << "There's " << s.filterByDate().size() << " elements\n";;
+      std::cout << "There's " << s.getPaths().filterByDate().size() << " elements\n";;
       if (s.size() < 20) {
         for (auto& item : s) {
           std::cout << '\t' << item.path().filename().string() << '\n';
@@ -45,7 +45,7 @@ int main(int args, char* argv[]) {
     else if (status.input.substr(0, 17) == "list by extension") { // fix there, it accepts only no extension
       status.input.erase(0, status.input.find_first_not_of(' ', 18));
       Selector s(status);
-      std::cout << "There's " << s.filterByExtension().size() << " elements\n";;
+      std::cout << "There's " << s.getPaths().filterByExtension().size() << " elements\n";;
       if (s.size() < 20) {
         for (auto& item : s) {
           std::cout << '\t' << item.path().filename().string() << '\n';

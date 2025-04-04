@@ -17,6 +17,10 @@ public:
   inline Selector(Status& status) : sStatus(status) {}
 
   Selector& getPaths();
+  Selector& getPaths(short year);
+  Selector& getPaths(const Path& path);
+  Selector& filterFiles();
+  Selector& filterDirectories();
   Selector& filterByDate();
   Selector& filterByExtension();
 
@@ -44,11 +48,13 @@ private:
 
   void getItemsInList(ExtractIteratorMode eim = DEFAULT);
 
+  bool isDateRelevant(const Item& item);
+
   RecurseItemIterator extractDirectory(ExtractIteratorMode eim);
 
 private:
   std::vector<Item> mItems;
   Status& sStatus;
-  bool bFirstTime = true;
+  EmplacedStatus mEmplaceDateStatus;
 };
 

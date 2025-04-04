@@ -18,7 +18,7 @@ char CommandCompressWebp::calculateOptimalLineFeed() {
 bool CommandCompressWebp::readFromJpeg() {
   FILE* fin = fopen(mFilePath.string().c_str(), "rb");
   if (!fin) {
-    std::cout << "Cannot open " << mFilePath << '\n';
+    std::cerr << "Cannot open " << mFilePath << '\n';
     return true;
   }
 
@@ -57,7 +57,7 @@ bool CommandCompressWebp::readFromJpeg() {
 
 bool CommandCompressWebp::writeToWebpInBuffer() {
   if (mChannels != 3) {
-    std::cout << "Unsupported format of channels (not R,G,B) in " << mFilePath << "\n";
+    std::cerr << "Unsupported format of channels (not R,G,B) in " << mFilePath << "\n";
     return true;
   }
   
@@ -66,15 +66,11 @@ bool CommandCompressWebp::writeToWebpInBuffer() {
   delete[] mData;
 
   if (!size) {
-    std::cout << "Failed to encode WebP in " << mFilePath << '\n';
-    return false;
+    std::cerr << "Failed to encode WebP in " << mFilePath << '\n';
+    return true;
   }
 
-   std::ofstream fout(
-     ((sStatus.branch.has_buffer_dir)
-       ? sStatus.branch.path / "buffer" / mOutPath.filename()
-       : mOutPath),
-    std::ios::binary);
+   std::ofstream fout(mOutPath, std::ios::binary);
   
   fout.write(reinterpret_cast<char*>(mDataBuf), size);
   fout.close();
@@ -85,23 +81,22 @@ bool CommandCompressWebp::writeToWebpInBuffer() {
 }
 
 bool CommandCompressWebp::writeToWebpInExif() {
-  auto image_ptr = Exiv2::ImageFactory::open(mOutPath.string());
-  if (image_ptr.get() == 0) {
-    std::cout << "Failed to load WebP image for metadata override\n";
+  auto image_ptr = Exiv2::ImageFactory::open(mFilePath.string());
+  auto outpt_ptr = Exiv2::ImageFactory::open(mOutPath.string());
+
+  if ((image_ptr.get() == 0) || (outpt_ptr.get() == 0)) {
+    std::cerr << "Failed to load WebP image for metadata override\n";
     return true;
   }
+
   image_ptr->readMetadata();
+  outpt_ptr->setExifData(image_ptr->exifData());
 
-  Exiv2::ExifData& exifData = image_ptr->exifData();
-
-  if (exifData.empty()) {
-    std::cout << "No Exif data found in the file\n";
+  try {
+    outpt_ptr->writeMetadata();
+  } catch (const Exiv2::Error&) {
+    std::cerr << "Could not write metadata to (" << mOutPath << ")\n";
     return true;
-  }
-  Exiv2::ExifData::const_iterator end = exifData.end();
-
-  for (auto& tag : exifData) {
-    // there
   }
 
   return false;

@@ -34,13 +34,13 @@ list(REMOVE_DUPLICATES INCLUDE_DIRS)
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 
 # Include modules
-add_subdirectory(external/libwebp)
-target_link_libraries(${PROJECT_NAME} PRIVATE webp)
-
 find_package(JPEG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
 
-find_package(exiv2 REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE exiv2)
+find_package(exiv2 CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE Exiv2::exiv2lib)
+
+add_subdirectory(external/libwebp)
+target_link_libraries(${PROJECT_NAME} PRIVATE webp)
 
 #add_subdirectory ("src" "./bin/")

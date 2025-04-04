@@ -8,7 +8,11 @@ class CommandCompressWebp : public CommandBase {
 public:
   CommandCompressWebp(Status& status) : CommandBase(status) {
     Selector select(status);
-    select.filterByDate();
+    EmplacedStatus es(status.date);
+    if (es.year)
+      select.getPaths(status.date.year).filterByDate();
+    else 
+      select.getPaths().filterByDate();
 
     for (size_t i = 0; i < select.size(); i++) {
       if (select[i].extension().string() != ".jpg") continue;
@@ -16,8 +20,13 @@ public:
       mFilePath = select[i];
       mOutPath = select[i];
       mOutPath.replace_extension(".webp");
+      mOutPath = ((sStatus.branch.has_buffer_dir)
+        ? sStatus.branch.path / "buffer" / mOutPath.filename()
+        : mOutPath);
+
       if (mExceptionTriggered = readFromJpeg()) return;
       if (mExceptionTriggered = writeToWebpInBuffer()) return;
+      if (mExceptionTriggered = writeToWebpInExif()) return;
     }
   }
 

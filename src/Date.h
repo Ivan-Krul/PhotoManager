@@ -15,13 +15,19 @@ struct Date {
 constexpr Date cNullDate = { std::numeric_limits<short>::min(), 0,0,0xff,0xff,0xff };
 
 struct EmplacedStatus {
-  inline EmplacedStatus(Date date) {
+  inline EmplacedStatus() = default;
+
+  inline void emplace(Date date) {
     year = date.year != cNullDate.year;
     month = date.month != cNullDate.month;
     day = date.day != cNullDate.day;
     hours = date.hours != cNullDate.hours;
     minutes = date.minutes != cNullDate.minutes;
     seconds = date.seconds != cNullDate.seconds;
+  }
+
+  inline EmplacedStatus(Date date) {
+    emplace(date);
   }
 
   bool year : 1;

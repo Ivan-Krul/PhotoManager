@@ -19,22 +19,6 @@
             }
         },
         {
-            "name": "linux-base",
-            "hidden": true,
-            "generator": "make",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "g++",
-                "CMAKE_CXX_COMPILER": "gcc",
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            }
-        },
-        {
             "name": "x64-debug",
             "displayName": "x64 Debug",
             "inherits": "windows-base",
