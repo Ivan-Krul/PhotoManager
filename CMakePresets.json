@@ -58,5 +58,13 @@
                 "CMAKE_BUILD_TYPE": "Release"
             }
         }
+    ],
+    "buildPresets": [
+        {
+            "name": "default-build-windows",
+            "displayName": "Default",
+            "configurePreset": "x64-debug",
+            "description": "Vanilla build"
+        }
     ]
 }

@@ -11,7 +11,7 @@ int init(int args, char* argv[], Status& status) {
 #ifdef DEBUG
   status.branch.path = Path("D:/Cellphone");
   status.date.year = 2025;
-  status.date.month = 3;
+  status.date.month = 4;
 #else
   if (args < 2) {
     std::string manual_path;

@@ -2,3 +2,6 @@
 	path = external/libwebp
 	url = https://chromium.googlesource.com/webm/libwebp
   
+[submodule "external/wxWidgets"]
+	path = external/wxWidgets
+	url = https://github.com/wxWidgets/wxWidgets.git

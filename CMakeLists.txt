@@ -40,6 +40,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
 find_package(exiv2 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Exiv2::exiv2lib)
 
+#set(wxWidgets_ROOT_DIR "D:/Applicational Projects/PhotoManager/external/wxWidgets/")
+set(wxBUILD_SHARED OFF)
+add_subdirectory(external/wxWidgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE wx::net wx::core wx::base)
+
 add_subdirectory(external/libwebp)
 target_link_libraries(${PROJECT_NAME} PRIVATE webp)
 

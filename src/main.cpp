@@ -11,6 +11,8 @@
 #include "OstreamOverloads.h"
 #include "Init.h"
 
+#include <wx/wx.h>
+
 int main(int args, char* argv[]) {
   Status status = {};
 
