@@ -23,7 +23,11 @@ project ("PhotoManager")
 file(GLOB_RECURSE INCLUDES src/*.h)
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
-add_executable(PhotoManager ${SOURCES} ${INCLUDES})
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    add_executable(${PROJECT_NAME} main.cpp)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${INCLUDES})
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 foreach(dir ${INCLUDES})
     get_filename_component(HEADER_DIR ${dir} DIRECTORY)

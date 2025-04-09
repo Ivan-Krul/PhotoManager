@@ -26,12 +26,30 @@ Selector& Selector::getPaths(const Path& path) {
 }
 
 Selector& Selector::filterFiles() {
-  std::remove_if(mItems.begin(), mItems.end(), [=](const Item& item) { return !item.is_directory(); });
+  std::vector<Item> items;
+  items.reserve(mItems.size() / 2);
+
+  for (const auto& item : mItems) {
+    if (item.is_directory()) items.emplace_back(item);
+  }
+
+  mItems = items;
+
+  mItems.shrink_to_fit();
   return *this;
 }
 
 Selector& Selector::filterDirectories() {
-  std::remove_if(mItems.begin(), mItems.end(), [=](const Item& item) { return item.is_directory(); });
+  std::vector<Item> items;
+  items.reserve(mItems.size() / 2);
+
+  for (const auto& item : mItems) {
+    if (!item.is_directory()) items.emplace_back(item);
+  }
+
+  mItems = items;
+
+  mItems.shrink_to_fit();
   return *this;
 }
 
