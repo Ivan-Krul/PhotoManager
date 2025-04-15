@@ -12,6 +12,7 @@
 #include "Init.h"
 #include "Application.h"
 
+DECLARE_APP(Application)
 wxIMPLEMENT_APP(Application);
 
 /*
