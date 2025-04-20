@@ -1,10 +1,11 @@
 #include "StatusManager.h"
 
+#include "Init.h"
 #include "Branch.h"
 
-StatusManager::Init(const char* path) {
+void StatusManager::Init(const char* path) {
   assert(path);
 
   mStatus.branch.path = path;
-  mStatus.branch = initDirList(status.branch.path);
+  mStatus.branch = initDirList(mStatus.branch.path);
 }

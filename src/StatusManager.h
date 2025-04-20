@@ -3,7 +3,7 @@
 
 class StatusManager {
 public:
-  Init(const char* path);
+  void Init(const char* path);
 
   inline Date GetSelectedDate() const { return mStatus.date; }
   

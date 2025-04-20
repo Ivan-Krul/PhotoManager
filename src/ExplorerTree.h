@@ -9,13 +9,13 @@ namespace explorer_tree {
     wxBoxSizer* treeSizer = new wxBoxSizer(wxHORIZONTAL);
     wxTreeCtrl* tree = new wxTreeCtrl(panel, ID_ExplorerTree);
 
-    auto rootId = tree->AddRoot("ROOOT");
-    wxTreeItemData* treeData1 = new wxTreeItemData;
-    wxTreeItemData* treeData2 = new wxTreeItemData;
-    tree->AppendItem(rootId, "child1");
-    tree->AppendItem(rootId, "child2");
+    auto rootId = tree->AddRoot(status->branch.path.filename().c_str());
 
-    tree->ExpandAll();
+    for (const auto year : status->branch.years) {
+      tree->AppendItem(rootId, wxString::Format(wxT("%i"),year));
+    }
+
+    tree->Expand();
     treeSizer->Add(tree, 1, wxEXPAND);
     panel->SetSizerAndFit(treeSizer);
   }
