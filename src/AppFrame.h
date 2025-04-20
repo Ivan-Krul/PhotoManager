@@ -1,32 +1,27 @@
 #pragma once
+#include "Status.h"
 
 #include <wx/wx.h>
 
 class AppFrame : public wxFrame {
 public:
-  AppFrame(const wxString& title);
+  AppFrame(const wxString& title, Status* status);
 
 private:
-  void PinMenu();
-  void BindHandles();
-
   void SetLayout();
+
+  void BindEvents();
+
+  void OnHello(wxCommandEvent& event);
+  void OnSave(wxCommandEvent& event);
+  void OnFind(wxCommandEvent& event);
+  void OnAbout(wxCommandEvent& event);
+  void OnExit(wxCommandEvent& event);
 
 #ifdef DEBUG
   void TestSetSideSplitter();
   void TestSetGroupSideSplitter();
 #endif
 
-  void OnHello(wxCommandEvent& event);
-  void OnButton(wxCommandEvent& event);
-  void OnSave(wxCommandEvent& event);
-  void OnFind(wxCommandEvent& event);
-  void OnAbout(wxCommandEvent& event);
-  void OnExit(wxCommandEvent& event);
-
-  enum IDs : int {
-    ID_Hello = 1,
-    ID_Button
-  };
-
+  Status* pStatus;
 };

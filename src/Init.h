@@ -4,6 +4,8 @@
 #include "Branch.h"
 #include "OstreamOverloads.h"
 
+#ifdef CONSOLE
+
 Branch initDirList(Path path);
 void outputStatus(const Status& status);
 
@@ -43,8 +45,9 @@ void outputStatus(const Status& status) {
   std::cout << "\tHas Buffer Directory:" << (status.branch.has_buffer_dir ? "yes" : "no") << '\n';
   std::cout << "\tHas Research Directory:" << (status.branch.has_research ? "yes" : "no") << '\n';
 }
+#endif
 
-Branch initDirList(Path path) {
+inline Branch initDirList(Path path) {
   Branch branch;
   branch.path = path;
 

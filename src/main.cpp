@@ -10,12 +10,14 @@
 #include "CommandCompressWebp.h"
 #include "OstreamOverloads.h"
 #include "Init.h"
+
+#ifndef CONSOLE
 #include "Application.h"
 
 DECLARE_APP(Application)
 wxIMPLEMENT_APP(Application);
 
-/*
+#else
 int main(int args, char* argv[]) {
   Status status = {};
 
@@ -69,4 +71,4 @@ int main(int args, char* argv[]) {
 
   std::cout << "exiting... \n";
 }
-*/
+#endif

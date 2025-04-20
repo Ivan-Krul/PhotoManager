@@ -1,11 +1,15 @@
 #include "AppFrame.h"
+#include "MenuBar.h"
+#include "ExplorerTree.h"
 
 #include <wx/splitter.h>
-#include <wx/treectrl.h>
+#include <wx/aboutdlg.h> 
 
-AppFrame::AppFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
-  PinMenu();
-  BindHandles();
+AppFrame::AppFrame(const wxString& title, Status* status) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(600,600)) {
+  pStatus = status;
+
+  menu_bar::InitLayout(this);
+  BindEvents();
 
   SetLayout();
 
@@ -13,57 +17,18 @@ AppFrame::AppFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
   SetStatusText("Welcome to Photo Manager!");
 }
 
-void AppFrame::PinMenu() {
-  wxMenu* menuFile = new wxMenu;
-  menuFile->Append(ID_Hello, "&Hello...\tCtrl+H", "Hello window");
-  menuFile->AppendSeparator();
-  menuFile->Append(wxID_SAVE);
-  menuFile->AppendSeparator();
-  menuFile->Append(wxID_EXIT);
-
-  wxMenu* menuSearch = new wxMenu;
-  menuSearch->Append(wxID_FIND);
-
-  wxMenu* menuHelp = new wxMenu;
-  menuHelp->Append(wxID_ABOUT);
-
-  wxMenuBar* menuBar = new wxMenuBar;
-  menuBar->Append(menuFile,   "&File");
-  menuBar->Append(menuSearch, "&Search");
-  menuBar->Append(menuHelp,   "&Help");
-
-  SetMenuBar(menuBar);
-}
-
-void AppFrame::BindHandles() {
-  Bind(wxEVT_MENU, &AppFrame::OnHello, this, ID_Hello);
-  Bind(wxEVT_MENU, &AppFrame::OnSave, this, wxID_SAVE);
-
-  Bind(wxEVT_MENU, &AppFrame::OnFind, this, wxID_FIND);
-
-  Bind(wxEVT_MENU, &AppFrame::OnAbout, this, wxID_ABOUT);
-
-  Bind(wxEVT_MENU, &AppFrame::OnExit, this, wxID_EXIT);
-
-  Bind(wxEVT_BUTTON, &AppFrame::OnButton, this, ID_Button);
-}
-
 void AppFrame::SetLayout() {
   wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER);
 
   wxPanel* leftPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
   leftPanel->SetBackgroundColour(wxColor(100, 100, 200));
-
-  wxBoxSizer* treeSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxTreeCtrl* tree = new wxTreeCtrl(leftPanel, wxID_ANY);
-  tree->AddRoot("ROOOT");
-  treeSizer->Add(tree, 1, wxEXPAND);
-  leftPanel->SetSizerAndFit(treeSizer);
+  explorer_tree::InitLayout(leftPanel, pStatus);
 
   wxPanel* rightPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
   rightPanel->SetBackgroundColour(wxColor(100, 200, 200));
 
   splitter->SetMinimumPaneSize(200);
+  splitter->SetSashGravity(0.0);
   splitter->SplitVertically(leftPanel, rightPanel);
 
 }
@@ -126,8 +91,18 @@ void AppFrame::TestSetGroupSideSplitter() {
 }
 #endif
 
-void AppFrame::OnExit(wxCommandEvent& event) {
-  Close(true);
+void AppFrame::BindEvents() {
+  Bind(wxEVT_MENU, &AppFrame::OnHello, this, ID_Hello);
+  Bind(wxEVT_MENU, &AppFrame::OnSave, this, wxID_SAVE);
+
+  Bind(wxEVT_MENU, &AppFrame::OnFind, this, wxID_FIND);
+
+  Bind(wxEVT_MENU, &AppFrame::OnAbout, this, wxID_ABOUT);
+  Bind(wxEVT_MENU, &AppFrame::OnExit, this, wxID_EXIT);
+}
+
+void AppFrame::OnHello(wxCommandEvent& event) {
+  wxLogMessage("Hello world from Photo Manager!");
 }
 
 void AppFrame::OnSave(wxCommandEvent& event) {
@@ -139,15 +114,18 @@ void AppFrame::OnFind(wxCommandEvent& event) {
 }
 
 void AppFrame::OnAbout(wxCommandEvent& event) {
-  wxMessageBox("Photo Manager is a program, that helps to manage photos", "About Photo Manager", wxOK | wxICON_INFORMATION);
+  constexpr char str_year[5] = { __DATE__[7], __DATE__[8], __DATE__[9], __DATE__[10], '\0' };
+
+  wxAboutDialogInfo info;
+  info.SetDescription(wxT("Photo Manager is a program, that helps to manage photos"));
+  info.SetName(wxT("Photo Manager"));
+  info.SetLicence(wxT("GNU GENERAL PUBLIC LICENSE Version 3 (GNU GPLv3)"));
+  info.SetCopyright(wxString("(C) ") + str_year + " Ivan-Krul <my@email.addre.ss>");
+
+  wxAboutBox(info);
 }
 
-void AppFrame::OnHello(wxCommandEvent& event) {
-  wxLogMessage("Hello world from Photo Manager!");
+void AppFrame::OnExit(wxCommandEvent& event) {
+  Close(true);
 }
-
-void AppFrame::OnButton(wxCommandEvent& event) {
-  wxLogMessage("HAii!!");
-}
-
 

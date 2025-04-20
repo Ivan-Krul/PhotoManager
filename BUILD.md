@@ -20,9 +20,15 @@ First you need to install vcpkg by following instructions of their
 Then you include dependancies within `gitmodules`.
 Just type this command in root directory `git submodule update --init --recursive`. 
 
-Then you launch CMake with using local enviroumental preset.
-To start generating, you have to create a file 
+For vcpkg the path to it's ports has to be defined `VCPKG_ROOT`
+in enviroumental variables (or command `$env:VCPKG_ROOT = "C:/path/to/your/root/vcpkg" $env:PATH = "$env:VCPKG_ROOT;$env:PATH"`).
 
+Then you generate and then build CMake project using presets.
+To discover your preferable preset, you should look in root directory `cmake --list-presets`
+(For that, you should change the build preset to your preferable).
+You just choose your preset and build via Visual Studio (default)
+or using gcc/clang by modifying configuration preset in `CMAKE_C_COMPILER` and `CMAKE_CXX_COMPILER`.
+Now you can build using `cmake --build --preset=default-build-windows`. And finally you would get a program.
 
 ## For Ubuntu/Debian
 I still have not discovered how to do this in those OSes.
