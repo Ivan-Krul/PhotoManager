@@ -1,11 +1,10 @@
 #include "AppFrame.h"
 #include "MenuBar.h"
-#include "ExplorerTree.h"
 
 #include <wx/splitter.h>
 #include <wx/aboutdlg.h> 
 
-AppFrame::AppFrame(const wxString& title, Status* status) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(600,600)) {
+AppFrame::AppFrame(const wxString& title, Status* status) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(600,400)) {
   pStatus = status;
 
   menu_bar::InitLayout(this);
@@ -22,7 +21,7 @@ void AppFrame::SetLayout() {
 
   wxPanel* leftPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
   leftPanel->SetBackgroundColour(wxColor(100, 100, 200));
-  explorer_tree::InitLayout(leftPanel, pStatus);
+  mTree.InitLayout(leftPanel, pStatus);
 
   wxPanel* rightPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
   rightPanel->SetBackgroundColour(wxColor(100, 200, 200));

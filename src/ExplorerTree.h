@@ -3,20 +3,21 @@
 
 #include <wx/wx.h>
 #include <wx/treectrl.h>
+#include <wx/artprov.h>
 
-namespace explorer_tree {
-  void InitLayout(wxPanel* panel, Status* status) {
-    wxBoxSizer* treeSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxTreeCtrl* tree = new wxTreeCtrl(panel, ID_ExplorerTree);
+class ExplorerTree {
+public:
+  enum IconId : int {
+    ICONID_Folder = 0,
+    ICONID_DefaultFile
+  };
 
-    auto rootId = tree->AddRoot(status->branch.path.filename().c_str());
+  inline void InitLayout(wxPanel* panel, const Status* status); // can't recognize element from AppFrame::SetLayout
 
-    for (const auto year : status->branch.years) {
-      tree->AppendItem(rootId, wxString::Format(wxT("%i"),year));
-    }
+private:
+  wxImageList* CreateImageList();
 
-    tree->Expand();
-    treeSizer->Add(tree, 1, wxEXPAND);
-    panel->SetSizerAndFit(treeSizer);
-  }
-}
+private:
+  std::vector<wxTreeItemId> maTreeItems;
+};
+

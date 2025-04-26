@@ -1,7 +1,11 @@
 #pragma once
 #include "Status.h"
+#include "ExplorerTree.h"
+
+#include <vector>
 
 #include <wx/wx.h>
+#include <wx/treectrl.h>
 
 class AppFrame : public wxFrame {
 public:
@@ -23,5 +27,7 @@ private:
   void TestSetGroupSideSplitter();
 #endif
 
+  ExplorerTree mTree;
+  
   Status* pStatus;
 };
