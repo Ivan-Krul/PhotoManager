@@ -1,4 +1,5 @@
 #include "ExplorerTree.h"
+#include "WidgetIds.h"
 
 #include <wx/wx.h>
 

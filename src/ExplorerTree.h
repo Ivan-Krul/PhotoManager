@@ -12,7 +12,7 @@ public:
     ICONID_DefaultFile
   };
 
-  inline void InitLayout(wxPanel* panel, const Status* status); // can't recognize element from AppFrame::SetLayout
+  void InitLayout(wxPanel* panel, const Status* status);
 
 private:
   wxImageList* CreateImageList();
