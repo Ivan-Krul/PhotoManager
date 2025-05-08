@@ -1,4 +1,7 @@
 #pragma once
+#include <string>
+#include <vector>
+
 #include "Status.h"
 
 #include <wx/wx.h>

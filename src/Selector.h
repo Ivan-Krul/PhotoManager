@@ -46,11 +46,7 @@ private:
       + (numstr & 0x0f) * 1000;
   }
 
-  void getItemsInList(ExtractIteratorMode eim = DEFAULT);
-
   bool isDateRelevant(const Item& item);
-
-  RecurseItemIterator extractDirectory(ExtractIteratorMode eim);
 
 private:
   std::vector<Item> mItems;

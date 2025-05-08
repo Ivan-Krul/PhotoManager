@@ -4,8 +4,9 @@
 #include <wx/splitter.h>
 #include <wx/aboutdlg.h> 
 
-AppFrame::AppFrame(const wxString& title, Status* status) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(600,400)) {
+AppFrame::AppFrame(const wxString& title, Status* status, wxLogWindow* log) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(600,400)) {
   pStatus = status;
+  pLogWindow = log;
 
   menu_bar::InitLayout(this);
   BindEvents();

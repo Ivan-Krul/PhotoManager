@@ -1,5 +1,8 @@
 #include "ExplorerTree.h"
 #include "WidgetIds.h"
+#include "DirectoryFetcher.h"
+
+#include <filesystem>
 
 #include <wx/wx.h>
 
@@ -15,8 +18,19 @@ void ExplorerTree::InitLayout(wxPanel* panel, const Status* status) {
    if (status->branch.has_research)
      maTreeItems.push_back(tree->AppendItem(rootId, ".research", ICONID_Folder));
 
+   auto childId = rootId;
+
    for (const auto year : status->branch.years) {
      maTreeItems.push_back(tree->AppendItem(rootId, wxString::Format(wxT("%i"), year), ICONID_Folder));
+     childId = maTreeItems.back();
+
+     auto inner_year = getChildItem(status->branch.path / std::to_string(year));
+     for (const auto& inner_item : inner_year) {
+       if (inner_item.is_directory())
+         maTreeItems.push_back(tree->AppendItem(childId, inner_item.path().filename().string(), ICONID_Folder));
+       else
+         maTreeItems.push_back(tree->AppendItem(childId, inner_item.path().filename().string()));
+     }
    }
 
    if (status->branch.has_buffer_dir)
@@ -41,3 +55,4 @@ wxImageList* ExplorerTree::CreateImageList() {
   }
   return imageList;
 }
+

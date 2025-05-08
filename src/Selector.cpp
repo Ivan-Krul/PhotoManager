@@ -1,4 +1,5 @@
 #include "Selector.h"
+#include "DirectoryFetcher.h"
 
 #include <exception>
 #include <algorithm>
@@ -70,8 +71,6 @@ Selector& Selector::filterByDate() {
 }
 
 Selector& Selector::filterByExtension() {
-  getItemsInList();
-
   if (sStatus.input[0] != '.') sStatus.input.insert(sStatus.input.begin(), '.');
   
   std::vector<Item> items;
@@ -85,13 +84,6 @@ Selector& Selector::filterByExtension() {
 
   mItems.shrink_to_fit();
   return *this;
-}
-
-void Selector::getItemsInList(ExtractIteratorMode eim) {
-  auto items = extractDirectory(eim);
-  for (auto const& item : items) {
-    mItems.emplace_back(item);
-  }
 }
 
 bool Selector::isDateRelevant(const Item& item) {
@@ -124,14 +116,3 @@ bool Selector::isDateRelevant(const Item& item) {
   return true;
 }
 
-RecurseItemIterator Selector::extractDirectory(ExtractIteratorMode eim) {
-  switch (eim) {
-  case YEAR:
-    return RecurseItemIterator(sStatus.branch.path / std::to_string(sStatus.date.year));
-  case YEAR_MONTH:
-    return RecurseItemIterator(sStatus.branch.path / std::to_string(sStatus.date.year) / std::to_string(sStatus.date.month));
-  case DEFAULT:
-  default:
-    return RecurseItemIterator(sStatus.branch.path);
-  }
-}

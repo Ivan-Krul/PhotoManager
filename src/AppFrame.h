@@ -9,7 +9,7 @@
 
 class AppFrame : public wxFrame {
 public:
-  AppFrame(const wxString& title, Status* status);
+  AppFrame(const wxString& title, Status* status, wxLogWindow* log);
 
 private:
   void SetLayout();
@@ -30,4 +30,5 @@ private:
   ExplorerTree mTree;
   
   Status* pStatus;
+  wxLogWindow* pLogWindow;
 };
