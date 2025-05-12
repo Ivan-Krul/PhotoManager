@@ -25,6 +25,8 @@ void ExplorerTree::InitLayout(wxPanel* panel, const Status* status) {
      childId = maTreeItems.back();
 
      auto inner_year = getChildItem(status->branch.path / std::to_string(year));
+     sortByNumber(inner_year);
+
      for (const auto& inner_item : inner_year) {
        if (inner_item.is_directory())
          maTreeItems.push_back(tree->AppendItem(childId, inner_item.path().filename().string(), ICONID_Folder));

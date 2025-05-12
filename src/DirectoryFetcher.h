@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 using RecurseItemIterator = std::filesystem::recursive_directory_iterator;
 using ItemIterator = std::filesystem::directory_iterator;
@@ -65,6 +66,7 @@ inline std::string anchorNumber(const std::string& filepath) {
 
 inline void sortByNumber(std::vector<Item>& items) {
   std::vector<std::pair<int, int>> number_index;
+  std::vector<Item> items_res;
   std::string inner_text;
 
   for (int i = 0; i < items.size(); i++) {
@@ -77,8 +79,16 @@ inline void sortByNumber(std::vector<Item>& items) {
       ));
   }
 
-  // sorting is there
-  // and placing in order the original list
+  std::sort(number_index.begin(), number_index.end(), [=](const std::pair<int, int>& first, const std::pair<int, int>& second){
+    return first.first < second.first;
+  });
+
+  items_res.resize(items.size());
+  for (int i = 0; i < items.size(); i++) {
+    items_res[i] = items[number_index[i].second];
+  }
+
+  items = items_res;
 }
 
 
