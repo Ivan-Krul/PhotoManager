@@ -6,12 +6,14 @@
 #include <wx/dirdlg.h> 
 
 bool Application::OnInit() {
-  wxLogWindow* log = new wxLogWindow(NULL, "Log window", true, true);
-
-  wxMessageBox("Choose a directory of your photos");
+#ifdef SHOW_DIR_SELECTION_AT_BEGINNING
   if (!SetDirectoryRoot()) return false;
+#else
+  mStatus.branch.path = "D:/Cellphone";
+  mStatus.branch = initDirList(mStatus.branch.path);
+#endif
 
-  AppFrame* frame = new AppFrame(wxT("Photo Manager"),&mStatus, log);
+  AppFrame* frame = new AppFrame(wxT("Photo Manager"),&mStatus);
   frame->Show();
   return true;
 }

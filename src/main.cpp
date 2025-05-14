@@ -2,8 +2,6 @@
 #include <string>
 #include <chrono>
 
-#define DEBUG
-
 #include "Status.h"
 #include "Selector.h"
 #include "CommandInputDateStamp.h"

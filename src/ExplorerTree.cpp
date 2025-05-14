@@ -6,41 +6,84 @@
 
 #include <wx/wx.h>
 
-void ExplorerTree::InitLayout(wxPanel* panel, const Status* status) {
-   wxBoxSizer* treeSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxTreeCtrl* tree = new wxTreeCtrl(panel, ID_ExplorerTree);
+void ExplorerTree::InitLayout(wxFrame* parent_frame, wxPanel* panel, const Status* status) {
+  pParentFrame = parent_frame;
+  pParentPanel = panel;
 
-   //    tree->Connect(10, wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(nullptr));
-   tree->AssignImageList(CreateImageList());
+  wxBoxSizer* treeSizer = new wxBoxSizer(wxHORIZONTAL);
+  pTree = new wxTreeCtrl(pParentPanel, ID_ExplorerTree);
 
-   auto rootId = tree->AddRoot(status->branch.path.filename().c_str(), ICONID_Folder);
+  //    tree->Connect(10, wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(nullptr));
+  pTree->AssignImageList(CreateImageList());
 
-   if (status->branch.has_research)
-     maTreeItems.push_back(tree->AppendItem(rootId, ".research", ICONID_Folder));
+  auto rootId = pTree->AddRoot(status->branch.path.filename().c_str(), ICONID_Folder);
 
-   auto childId = rootId;
+  if (status->branch.has_research)
+    maTreeItems.push_back(pTree->AppendItem(rootId, ".research", ICONID_Folder));
 
-   for (const auto year : status->branch.years) {
-     maTreeItems.push_back(tree->AppendItem(rootId, wxString::Format(wxT("%i"), year), ICONID_Folder));
-     childId = maTreeItems.back();
+  auto childId = rootId;
 
-     auto inner_year = getChildItem(status->branch.path / std::to_string(year));
-     sortByNumber(inner_year);
+  for (const auto year : status->branch.years) {
+    maTreeItems.push_back(pTree->AppendItem(rootId, wxString::Format(wxT("%i"), year), ICONID_Folder));
+    childId = maTreeItems.back();
 
-     for (const auto& inner_item : inner_year) {
-       if (inner_item.is_directory())
-         maTreeItems.push_back(tree->AppendItem(childId, inner_item.path().filename().string(), ICONID_Folder));
-       else
-         maTreeItems.push_back(tree->AppendItem(childId, inner_item.path().filename().string()));
-     }
-   }
+    auto inner_year = getChildItem(status->branch.path / std::to_string(year));
 
-   if (status->branch.has_buffer_dir)
-     maTreeItems.push_back(tree->AppendItem(rootId, "buffer", ICONID_Folder));
+    if (inner_year.size() > 50) {
+      maTreeItems.push_back(pTree->AppendItem(childId, EXPLORERTREE_TOO_MUCH));
+      continue;
+    }
+    
+    sortByNumber(inner_year);
 
-   tree->Expand(rootId);
-   treeSizer->Add(tree, 1, wxEXPAND);
-   panel->SetSizerAndFit(treeSizer);
+    for (const auto& inner_item : inner_year) {
+      if (inner_item.is_directory())
+        maTreeItems.push_back(pTree->AppendItem(childId, inner_item.path().filename().string(), ICONID_Folder));
+      else
+        maTreeItems.push_back(pTree->AppendItem(childId, inner_item.path().filename().string()));
+    }
+  }
+
+  if (status->branch.has_buffer_dir)
+    maTreeItems.push_back(pTree->AppendItem(rootId, "buffer", ICONID_Folder));
+
+  pTree->Expand(rootId);
+  treeSizer->Add(pTree, 1, wxEXPAND);
+  pParentPanel->SetSizerAndFit(treeSizer);
+}
+
+void ExplorerTree::OnActivateItem(wxTreeEvent& event) {
+  auto baseChildItemId = event.GetItem();
+
+  pTree->GetItemParent(baseChildItemId);
+
+  wxMessageBox(wxString("From the tree:") + ConstructPath(event.GetItem()));
+}
+
+std::vector<wxTreeItemId> ExplorerTree::ConstructItemChain(wxTreeItemId id) {
+  std::vector<wxTreeItemId> path;
+
+  const wxTreeItemId id_root = pTree->GetRootItem();
+  wxTreeItemId id_local = id;
+
+  do {
+    path.push_back(id_local);
+    id_local = pTree->GetItemParent(id_local);
+  } while (id_local != id_root);
+
+  return path;
+}
+
+wxString ExplorerTree::ConstructPath(wxTreeItemId id) {
+  auto path_ids = ConstructItemChain(id);
+  bool is_there_alot_of_items = pTree->GetItemText(id) == EXPLORERTREE_TOO_MUCH;
+  wxString res;
+
+  for (int i = path_ids.size() - 1 - is_there_alot_of_items; i >= 0; i--) {
+    res += "/" + pTree->GetItemText(path_ids[i]);
+  }
+
+  return res;
 }
 
 wxImageList* ExplorerTree::CreateImageList() {

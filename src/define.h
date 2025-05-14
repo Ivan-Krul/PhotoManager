@@ -6,4 +6,10 @@
 
 #pragma warning(disable : 4996)
 
+#define EXPLORERTREE_TOO_MUCH "..."
+
+#define DEBUG
+//#define SHOW_DIR_SELECTION_AT_BEGINNING
+//#define ENABLE_TESTS_IN_APPFRAME
+
 //#define CONSOLE

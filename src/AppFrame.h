@@ -9,7 +9,7 @@
 
 class AppFrame : public wxFrame {
 public:
-  AppFrame(const wxString& title, Status* status, wxLogWindow* log);
+  AppFrame(const wxString& title, Status* status);
 
 private:
   void SetLayout();
@@ -21,8 +21,9 @@ private:
   void OnFind(wxCommandEvent& event);
   void OnAbout(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
+  void OnExplorerTreeActivateItem(wxTreeEvent& event);
 
-#ifdef DEBUG
+#ifdef ENABLE_TESTS_IN_APPFRAME
   void TestSetSideSplitter();
   void TestSetGroupSideSplitter();
 #endif
@@ -30,5 +31,4 @@ private:
   ExplorerTree mTree;
   
   Status* pStatus;
-  wxLogWindow* pLogWindow;
 };

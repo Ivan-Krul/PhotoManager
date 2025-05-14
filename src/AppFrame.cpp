@@ -4,16 +4,15 @@
 #include <wx/splitter.h>
 #include <wx/aboutdlg.h> 
 
-AppFrame::AppFrame(const wxString& title, Status* status, wxLogWindow* log) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(600,400)) {
+AppFrame::AppFrame(const wxString& title, Status* status) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(600,400)) {
   pStatus = status;
-  pLogWindow = log;
 
   menu_bar::InitLayout(this);
-  BindEvents();
 
   SetLayout();
-
   CreateStatusBar();
+
+  BindEvents();
   SetStatusText("Welcome to Photo Manager!");
 }
 
@@ -22,7 +21,7 @@ void AppFrame::SetLayout() {
 
   wxPanel* leftPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
   leftPanel->SetBackgroundColour(wxColor(100, 100, 200));
-  mTree.InitLayout(leftPanel, pStatus);
+  mTree.InitLayout(this, leftPanel, pStatus);
 
   wxPanel* rightPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
   rightPanel->SetBackgroundColour(wxColor(100, 200, 200));
@@ -33,7 +32,7 @@ void AppFrame::SetLayout() {
 
 }
 
-#ifdef DEBUG
+#ifdef ENABLE_TESTS_IN_APPFRAME
 void AppFrame::TestSetSideSplitter() {
   wxBoxSizer* sizermain = new wxBoxSizer(wxVERTICAL);
   wxSplitterWindow* splittermain = new wxSplitterWindow(this, wxID_ANY);
@@ -99,6 +98,8 @@ void AppFrame::BindEvents() {
 
   Bind(wxEVT_MENU, &AppFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &AppFrame::OnExit, this, wxID_EXIT);
+  
+  Bind(wxEVT_TREE_ITEM_ACTIVATED, &AppFrame::OnExplorerTreeActivateItem, this, ID_ExplorerTree);
 }
 
 void AppFrame::OnHello(wxCommandEvent& event) {
@@ -111,6 +112,10 @@ void AppFrame::OnSave(wxCommandEvent& event) {
 
 void AppFrame::OnFind(wxCommandEvent& event) {
   wxMessageBox("There should be a find tab", "Find", wxOK);
+}
+
+void AppFrame::OnExplorerTreeActivateItem(wxTreeEvent& event) {
+  mTree.OnActivateItem(event);
 }
 
 void AppFrame::OnAbout(wxCommandEvent& event) {
