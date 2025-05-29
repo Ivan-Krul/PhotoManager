@@ -1,4 +1,4 @@
-#include <iostream>
+//#include <iostream>
 #include <string>
 #include <cstdlib>
 #include <cstring>
@@ -21,19 +21,19 @@ bool executePowershellURI(std::string uri) {
     if (uri[3] == '/') // to be sure if it's really a tom and not a directory in root in unix
       uri.insert(uri.begin() + 3, ':');
 
-    std::cout << uri << '\n';
+    //std::cout << uri << '\n';
 
     uri.erase(0, 2);
     if (uri[0] == '/') {
       uri.erase(0, 1);
       std::string path = uri.substr(0, uri.find('/'));
-      std::cout << path << '\n';
+      //std::cout << path << '\n';
 
       system((std::string("cd \"" + path + "\" | powershell -File \"") + uri + "\"").c_str());
     } else
       system((std::string("powershell -File \"") + uri + "\"").c_str());
   } else {
-    std::cout << uri << '\n';
+    //std::cout << uri << '\n';
 
     if (parsed) {
       // scripts itself

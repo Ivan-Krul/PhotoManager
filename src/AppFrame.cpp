@@ -125,7 +125,7 @@ void AppFrame::OnAbout(wxCommandEvent& event) {
   info.SetDescription(wxT("Photo Manager is a program, that helps to manage photos"));
   info.SetName(wxT("Photo Manager"));
   info.SetLicence(wxT("GNU GENERAL PUBLIC LICENSE Version 3 (GNU GPLv3)"));
-  info.SetCopyright(wxString("(C) ") + str_year + " Ivan-Krul <my@email.addre.ss>");
+  info.SetCopyright(wxString("(C) ") + str_year + " Ivan-Krul <>");
 
   wxAboutBox(info);
 }
