@@ -3,5 +3,6 @@
 
 enum IDs : int {
   ID_Hello = wxID_HIGHEST + 1,
-  ID_ExplorerTree
+  ID_ExplorerTree,
+  ID_PhotoViewerScrollWindow
 };

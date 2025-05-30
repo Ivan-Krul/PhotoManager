@@ -1,6 +1,7 @@
 #pragma once
 #include "Status.h"
 #include "ExplorerTree.h"
+#include "PhotoPreviewer.h"
 
 #include <vector>
 
@@ -29,6 +30,7 @@ private:
 #endif
 
   ExplorerTree mTree;
-  
+  PhotoPreviewer mPreviewer;
+
   Status* pStatus;
 };

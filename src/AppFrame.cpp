@@ -19,12 +19,13 @@ AppFrame::AppFrame(const wxString& title, Status* status) : wxFrame(nullptr, wxI
 void AppFrame::SetLayout() {
   wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER);
 
-  wxPanel* leftPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
-  leftPanel->SetBackgroundColour(wxColor(100, 100, 200));
+  auto leftPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
   mTree.InitLayout(this, leftPanel, pStatus);
 
-  wxPanel* rightPanel = new wxPanel(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
-  rightPanel->SetBackgroundColour(wxColor(100, 200, 200));
+  auto rightPanel = new wxScrolled<wxPanel>(splitter, wxID_ANY, wxDefaultPosition, wxSize(200, 100));
+  rightPanel->SetScrollRate(0, FromDIP(10));
+  rightPanel->SetBackgroundColour(wxColor(200, 200, 100));
+  mPreviewer.InitLayout(this, rightPanel, pStatus);
 
   splitter->SetMinimumPaneSize(200);
   splitter->SetSashGravity(0.0);
